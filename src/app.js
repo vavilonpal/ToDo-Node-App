@@ -1,10 +1,10 @@
 const express = require('express');
 const bodyParser = require('express').json;
 const {sequelize} = require('./models');
-const categoriesRouter = require('./routes/categories');
-const todosRouter = require('./routes/todos');
+const categoriesRouter = require('./routes/categoryRoutes');
+const todosRouter = require('./routes/todoRoutes');
 const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('../swagger');
+const swaggerSpec = require('./swagger');
 
 const app = express();
 app.use(bodyParser());

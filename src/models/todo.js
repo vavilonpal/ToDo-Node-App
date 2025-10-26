@@ -1,5 +1,4 @@
 'use strict';
-const { v4: uuidv4 } = require('uuid');
 module.exports = (sequelize, DataTypes) => {
     const Todo = sequelize.define('Todo', {
         id: {
