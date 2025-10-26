@@ -7,7 +7,17 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4
         },
-        title: { type: DataTypes.TEXT, allowNull: false },
+        // Validation on field level
+        title: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+            validate: {
+                len: {
+                    args: [2, 120],
+                    msg: 'Title length must be between 2 and 120 characters'
+                }
+            }
+        },
         completed: { type: DataTypes.BOOLEAN, defaultValue: false },
         due_date: { type: DataTypes.DATE, allowNull: true }
     }, {
