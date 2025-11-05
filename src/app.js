@@ -1,17 +1,24 @@
 const express = require('express');
 const bodyParser = require('express').json;
 const {sequelize} = require('./models');
-const categoriesRouter = require('./routes/categoryRoutes');
-const todosRouter = require('./routes/todoRoutes');
+const categoriesRouter = require('./routes/categoryRouter');
+const todosRouter = require('./routes/todoRouter');
+const authRouter = require('./routes/authRouter');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 
 const app = express();
 app.use(bodyParser());
 
+// Documentation
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.use('/api/categories', categoriesRouter);
+
 app.use('/api/todos', todosRouter);
+
+app.use('/api/auth', authRouter);
+
 
 // Обработка ошибок JSON
 app.use((err,

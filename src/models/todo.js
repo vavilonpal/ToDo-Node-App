@@ -6,7 +6,6 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4
         },
-        // Validation on field level
         title: {
             type: DataTypes.TEXT,
             allowNull: false,
@@ -18,7 +17,17 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         completed: { type: DataTypes.BOOLEAN, defaultValue: false },
-        due_date: { type: DataTypes.DATE, allowNull: true }
+        due_date: { type: DataTypes.DATE, allowNull: true },
+        category_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: { model: 'categories', key: 'id' }
+        },
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: { model: 'users', key: 'id' }
+        }
     }, {
         tableName: 'todos',
         underscored: true,
@@ -29,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Todo.associate = function(models) {
         Todo.belongsTo(models.Category, { foreignKey: 'category_id', as: 'category' });
+        Todo.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
     };
 
     return Todo;
