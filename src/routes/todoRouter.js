@@ -4,7 +4,7 @@ const todoController = require('../controllers/todoController');
 const validate = require('../middleware/validate');
 const {createTodoValidator, updateTodoValidator} = require('../validators/todoValidator');
 const auth = require('../middleware/auth/auth.middleware.js');
-const {isOwnerOrAdmin} = require('../middleware/role.middleware');
+const {isOwnerOrAdmin, isAdmin} = require('../middleware/role.middleware');
 const {Todo} = require('../models');
 
 router.get('/',
@@ -46,7 +46,7 @@ router.put('/:id',
 
 router.delete('/:id',
     auth,
-    isOwnerOrAdmin(async (req) => {
+    isAdmin(async (req) => {
         const todo = await Todo.findByPk(req.params.id);
         return todo ? todo.user_id : null;
     }),

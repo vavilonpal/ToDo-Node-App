@@ -58,10 +58,15 @@ exports.createTodo = async (req, res) => {
     try {
         const { title, category_id, due_date } = req.body;
 
-        if (!title || title.length < 2 || title.length > 120)
-            return res.status(400).json({ message: 'Title must be 2–120 characters' });
+        const userId = req.user.userId;
 
-        const todo = await Todo.create({ title, category_id, due_date });
+        const todo = await Todo.create({
+            title,
+            category_id,
+            due_date,
+            user_id: userId
+        });
+
         res.status(201).json(todo);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -74,9 +79,6 @@ exports.updateTodo = async (req, res) => {
         if (!todo) return res.status(404).json({ message: 'Todo not found' });
 
         const { title, completed, category_id, due_date } = req.body;
-
-        if (title && (title.length < 2 || title.length > 120))
-            return res.status(400).json({ message: 'Title must be 2–120 characters' });
 
         todo.title = title ?? todo.title;
         todo.completed = completed ?? todo.completed;

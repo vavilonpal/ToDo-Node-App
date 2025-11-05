@@ -13,7 +13,7 @@
 
 Добавьте новую таблицу `users`, а также связь с таблицей `todos`.
 
-![img.png](img.png)
+![img.png](images/img.png)
 
 Изменения в таблице `todos`, добавьте поле `user_id` для связи с пользователем-владельцем задачи:
 
@@ -194,12 +194,20 @@ router.delete('/:id',
 
 module.exports = router;
 ```
+
+### Шаг 6. Проверка и демонстрация
 1. Зарегистрируйте двух пользователей:
    1. `admin@example.com` с ролью `admin`
+   ![img_1.png](images/img_1.png)
    2. `user@example.com` с ролью `user`
+   ![img_2.png](images/img_2.png)
 2. Войдите и получите JWT для каждого.
+![img_3.png](images/img_3.png)
+![img_4.png](images/img_4.png)
 3. Проверьте следующие сценарии:
    1. user выполняет `POST /api/todos` — успешно.
+   ![img_5.png](images/img_5.png)
    2. user выполняет `DELETE /api/todos/:id` — получает `403 Forbidden`
+   ![img_6.png](images/img_6.png)
    3. admin выполняет `PUT/DELETE` на любую задачу или категорию → успех (`200/204`).
-### Шаг 6. Проверка и демонстрация
+   ![img_7.png](images/img_7.png)

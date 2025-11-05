@@ -1,19 +1,22 @@
 
 exports.isAdmin = (req, res, next) => {
-    try {
-        if (!req.user) {
-            return res.status(401).json({ message: 'Unauthorized: user not found in request' });
-        }
+    return async (req, res, next) => {
+        try {
+            if (!req.user) {
+                return res.status(401).json({ message: 'Unauthorized: user not found in request' });
+            }
 
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied: admin role required' });
-        }
+            if (req.user.role !== 'admin') {
+                return res.status(403).json({ message: 'Access denied: admin role required'});
+            }
 
-        next();
-    } catch (error) {
-        console.error('isAdmin middleware error:', error);
-        res.status(500).json({ message: 'Server error' });
+            next();
+        } catch (error) {
+            console.error('isAdmin middleware error:', error);
+            res.status(500).json({ message: 'Server error' });
+        }
     }
+
 };
 
 

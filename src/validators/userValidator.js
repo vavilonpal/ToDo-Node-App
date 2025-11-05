@@ -5,7 +5,7 @@ const {User} = require('../models');
 exports.registerUserValidator = [
     body('username')
         .notEmpty().withMessage('Username is required')
-        .custom(async (req) => {
+        .custom(async (username) => {
             const existingUsername = await User.findOne({where: {username}});
             if (existingUsername) {
                 throw new Error('Username already taken');
