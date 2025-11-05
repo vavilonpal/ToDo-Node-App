@@ -47,3 +47,37 @@ router.get('/profile',);
    1. Токен передаётся в заголовке `Authorization: Bearer <token>`.
    2. Если токен валиден — верните информацию о пользователе.
    3. Если нет — статус `401 Unauthorized`.
+
+### Шаг 3. Реализация авторизации (Authorization)
+1. Реализуйте middleware, проверяющее JWT (`auth/jwtVerification.js`)
+   1. Если токен отсутствует или невалиден → `401 Unauthorized`.
+   2. Если токен валиден → запишите объект пользователя в `req.user`.
+```js
+module.exports = (req, res, next) => {
+   try {
+      const authHeader = req.headers['authorization'];
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+         return res.status(401).json({ message: 'Authorization token missing or malformed' });
+      }
+
+      const token = authHeader.split(' ')[1];
+      const secret = process.env.JWT_SECRET;
+
+      if (!secret) {
+         console.error('JWT_SECRET not defined in environment variables');
+         return res.status(500).json({ message: 'Server configuration error' });
+      }
+      const decoded = jwtVerification.verify(token, secret);
+      req.user = decoded;
+
+      next();
+   } catch (err) {
+      console.error('JWT verification error:', err.message);
+      return res.status(401).json({ message: 'Invalid or expired token' });
+   }
+};
+```
+2. Реализуйте ролевую авторизацию:
+   1. Middleware `isAdmin` допускает доступ только пользователям с ролью "admin".
+   2. Middleware `isOwnerOrAdmin` допускает доступ, если пользователь — владелец ресурса или администратор.

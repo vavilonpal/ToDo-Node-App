@@ -3,10 +3,9 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {User} = require('../models');
-const {}
-// секрет лучше хранить в .env
+
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
-const JWT_EXPIRES_IN = '1h';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 module.exports = {
 
@@ -44,9 +43,6 @@ module.exports = {
         try {
             const {email, password} = req.body;
 
-            if (!email || !password) {
-                return res.status(400).json({message: 'Email and password required'});
-            }
 
             const user = await User.findOne({where: {email}});
             if (!user) {
@@ -82,28 +78,9 @@ module.exports = {
     // GET /profile
     profile: async (req, res) => {
         try {
-            const authHeader = req.headers.authorization;
-            if (!authHeader || !authHeader.startsWith('Bearer ')) {
-                return res.status(401).json({message: 'Token required'});
-            }
-
-            const token = authHeader.split(' ')[1];
-
-            // Проверка токена
-            jwt.verify(token, JWT_SECRET, async (err, decoded) => {
-                if (err) {
-                    return res.status(401).json({message: 'Invalid or expired token'});
-                }
-
-                const user = await User.findByPk(decoded.userId, {
-                    attributes: ['id', 'username', 'email', 'role', 'created_at']
-                });
-
-                if (!user) {
-                    return res.status(404).json({message: 'User not found'});
-                }
-
-                res.status(200).json({user});
+            res.json({
+                message: 'User profile loaded successfully',
+                user: req.user
             });
         } catch (error) {
             console.error('Profile error:', error);
