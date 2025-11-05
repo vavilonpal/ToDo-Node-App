@@ -1,6 +1,4 @@
-/**
- * Проверка роли администратора
- */
+
 exports.isAdmin = (req, res, next) => {
     try {
         if (!req.user) {
@@ -26,18 +24,14 @@ exports.isOwnerOrAdmin = (getOwnerId) => {
                 return res.status(401).json({ message: 'Unauthorized: user not found in request' });
             }
 
-            // Если админ — всегда пропускаем
             if (req.user.role === 'admin') {
                 return next();
             }
 
-            // Получаем ID владельца (например, задачи)
             const ownerId = await getOwnerId(req);
             if (!ownerId) {
                 return res.status(404).json({ message: 'Resource not found' });
             }
-
-            // Проверяем совпадение userId
             if (req.user.userId !== ownerId) {
                 return res.status(403).json({ message: 'Access denied: not your resource' });
             }

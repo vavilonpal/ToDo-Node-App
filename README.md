@@ -49,7 +49,7 @@ router.get('/profile',);
    3. Если нет — статус `401 Unauthorized`.
 
 ### Шаг 3. Реализация авторизации (Authorization)
-1. Реализуйте middleware, проверяющее JWT (`auth/jwtVerification.js`)
+1. Реализуйте middleware, проверяющее JWT (`auth/auth.middleware.js`)
    1. Если токен отсутствует или невалиден → `401 Unauthorized`.
    2. Если токен валиден → запишите объект пользователя в `req.user`.
 ```js
@@ -68,7 +68,7 @@ module.exports = (req, res, next) => {
          console.error('JWT_SECRET not defined in environment variables');
          return res.status(500).json({ message: 'Server configuration error' });
       }
-      const decoded = jwtVerification.verify(token, secret);
+      const decoded = authMiddleware.verify(token, secret);
       req.user = decoded;
 
       next();
@@ -80,4 +80,126 @@ module.exports = (req, res, next) => {
 ```
 2. Реализуйте ролевую авторизацию:
    1. Middleware `isAdmin` допускает доступ только пользователям с ролью "admin".
+```js
+exports.isAdmin = (req, res, next) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized: user not found in request' });
+        }
+
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied: admin role required' });
+        }
+
+        next();
+    } catch (error) {
+        console.error('isAdmin middleware error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+```
    2. Middleware `isOwnerOrAdmin` допускает доступ, если пользователь — владелец ресурса или администратор.
+```js
+exports.isOwnerOrAdmin = (getOwnerId) => {
+    return async (req, res, next) => {
+        try {
+            if (!req.user) {
+                return res.status(401).json({ message: 'Unauthorized: user not found in request' });
+            }
+
+            if (req.user.role === 'admin') {
+                return next();
+            }
+
+            const ownerId = await getOwnerId(req);
+            if (!ownerId) {
+                return res.status(404).json({ message: 'Resource not found' });
+            }
+            if (req.user.userId !== ownerId) {
+                return res.status(403).json({ message: 'Access denied: not your resource' });
+            }
+
+            next();
+        } catch (error) {
+            console.error('isOwnerOrAdmin middleware error:', error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    };
+};
+```
+
+_Политика действий по ролям_:
+
+- _Обычный пользователь_ (`role=user`):
+   - Создание задач (POST `/api/todos`)
+   - Просмотр задач (GET `/api/todos`)
+- _Администратор_ (`role=admin`):
+   - Полный доступ ко всем задачам (CRUD на `/api/todos`)
+   - Управление категориями (CRUD на `/api/categories`)
+```js
+const express = require('express');
+const router = express.Router();
+const todoController = require('../controllers/todoController');
+const validate = require('../middleware/validate');
+const {createTodoValidator, updateTodoValidator} = require('../validators/todoValidator');
+const auth = require('../middleware/auth/auth.middleware.js');
+const {isOwnerOrAdmin} = require('../middleware/role.middleware');
+const {Todo} = require('../models');
+
+router.get('/',
+        auth,
+        async (req, res) => {
+           try {
+              if (req.user.role === 'admin') {
+                 const todos = todoController.getAllTodos(req, res);
+                 return res.json(todos);
+              }
+
+              const todos = await Todo.findAll({where: {user_id: req.user.userId}});
+              res.json(todos);
+           } catch (error) {
+              res.status(500).json({message: 'Server error'});
+           }
+        }
+);
+
+router.get('/:id', todoController.getTodoById);
+
+// Only auth users can create task
+router.post('/',
+        auth,
+        createTodoValidator,
+        validate,
+        todoController.createTodo
+);
+
+router.put('/:id',
+        auth,
+        updateTodoValidator,
+        isOwnerOrAdmin(async (req) => {
+           const todo = await Todo.findByPk(req.params.id);
+           return todo ? todo.user_id : null;
+        }),
+        validate,
+        todoController.updateTodo);
+
+router.delete('/:id',
+        auth,
+        isOwnerOrAdmin(async (req) => {
+           const todo = await Todo.findByPk(req.params.id);
+           return todo ? todo.user_id : null;
+        }),
+        todoController.deleteTodo
+);
+
+module.exports = router;
+```
+1. Зарегистрируйте двух пользователей:
+   1. `admin@example.com` с ролью `admin`
+   2. `user@example.com` с ролью `user`
+2. Войдите и получите JWT для каждого.
+3. Проверьте следующие сценарии:
+   1. user выполняет `POST /api/todos` — успешно.
+   2. user выполняет `DELETE /api/todos/:id` — получает `403 Forbidden`
+   3. admin выполняет `PUT/DELETE` на любую задачу или категорию → успех (`200/204`).
+### Шаг 6. Проверка и демонстрация

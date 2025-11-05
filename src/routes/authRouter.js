@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require('../controllers/authController');
 const {registerUserValidator, loginUserValidator} = require("../validators/userValidator");
 const {validationResult} = require('express-validator');
-const auth = require('../middleware/auth/jwtVerification');
+const auth = require('../middleware/auth/auth.middleware');
 // Register end-point
 router.post('/register',
     registerUserValidator,

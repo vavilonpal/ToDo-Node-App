@@ -1,4 +1,4 @@
-const jwtVerification = require('jsonwebtoken');
+const authMiddleware = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
     try {
@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
             console.error('JWT_SECRET not defined in environment variables');
             return res.status(500).json({ message: 'Server configuration error' });
         }
-        const decoded = jwtVerification.verify(token, secret);
+        const decoded = authMiddleware.verify(token, secret);
         req.user = decoded;
 
         next();
