@@ -3,7 +3,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {User} = require('../models');
-
+const {}
 // секрет лучше хранить в .env
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 const JWT_EXPIRES_IN = '1h';
@@ -14,24 +14,6 @@ module.exports = {
     register: async (req, res) => {
         try {
             const {username, email, password, role} = req.body;
-
-            if (!username || !email || !password) {
-                return res.status(400).json({message: 'All fields are required'});
-            }
-
-            const existingUser = await User.findOne({
-                where: {email}
-            });
-            if (existingUser) {
-                return res.status(409).json({message: 'Email already in use'});
-            }
-
-            const existingUsername = await User.findOne({
-                where: {username}
-            });
-            if (existingUsername) {
-                return res.status(409).json({message: 'Username already taken'});
-            }
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
