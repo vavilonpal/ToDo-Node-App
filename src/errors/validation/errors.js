@@ -16,8 +16,9 @@ class NotFoundError extends AppError {
 }
 
 class ValidationError extends AppError {
-    constructor(message = 'Validation failed') {
+    constructor(message = 'Validation failed', details = []) {
         super(message, 400);
+        this.details = details;
     }
 }
 
@@ -27,9 +28,16 @@ class DatabaseError extends AppError {
     }
 }
 
+class UserExistError extends AppError {
+    constructor(message = 'User validation failed') {
+        super(message, 400);
+    }
+}
+
 module.exports = {
     AppError,
     NotFoundError,
     ValidationError,
-    DatabaseError
+    DatabaseError,
+    UserExistError
 };

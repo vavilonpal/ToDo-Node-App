@@ -1,0 +1,5 @@
+[2025-11-12 19:39:04] info: POST /api/auth/register 400 189 - 18.450 ms
+[2025-11-12 19:41:42] error: Ошибка валидации данных - POST /api/auth/register
+[2025-11-12 19:41:42] info: POST /api/auth/register 400 75 - 18.076 ms
+[2025-11-12 19:42:36] error: Ошибка валидации данных - POST /api/auth/register
+[2025-11-12 19:42:36] info: POST /api/auth/register 400 189 - 16.263 ms

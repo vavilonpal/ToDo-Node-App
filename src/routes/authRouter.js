@@ -1,26 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/authController');
-const {registerUserValidator, loginUserValidator} = require("../validators/userValidator");
-const {validationResult} = require('express-validator');
+const {registerUserValidator, loginUserValidator, validate} = require("../validators/userValidator");
 const auth = require('../middleware/auth/auth.middleware');
 // Register end-point
-router.post('/register',
-    registerUserValidator,
-    //Validation
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
-        }
-        await controller.register(req, res)
-    }
+router.post(
+    '/register',
+    ...registerUserValidator,
+    validate,
+    controller.register
 );
 
 // Login end-point
 router.post(
     '/login',
-    loginUserValidator,
+    ...loginUserValidator,
+    validate,
     controller.login
 );
 
