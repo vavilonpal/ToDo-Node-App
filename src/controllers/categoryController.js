@@ -1,5 +1,4 @@
 const {Category} = require('../models');
-
 exports.getAllCategories = async (req, res) => {
     try {
         const categories = await Category.findAll();
@@ -19,41 +18,30 @@ exports.getCategoryById = async (req, res) => {
     }
 };
 
-exports.createCategory = async (req, res) => {
+exports.createCategory = async (req, res, next) => {
     try {
-        const {name} = req.body;
-        if (!name || name.trim() === '')
-            return res.status(400).json({message: 'Category name is required'});
+        const cat = await Category.create(req.body);
 
-        const category = await Category.create({name});
-        res.status(201).json(category);
+        res.status(201).json({ status: 'success', data: cat });
     } catch (err) {
-        res.status(500).json({message: err.message});
+        next(err);
     }
 };
 
-exports.updateCategory = async (req, res) => {
+exports.updateCategory = async (req, res, next) => {
     try {
-        const category = await Category.findByPk(req.params.id);
-        if (!category) return res.status(404).json({message: 'Category not found'});
-
-        category.name = req.body.name || category.name;
-        await category.save();
-
-        res.json(category);
+        const cat = await Category.update(req.params.id, req.body);
+        res.json({ status: 'success', data: cat });
     } catch (err) {
-        res.status(500).json({message: err.message});
+        next(err);
     }
 };
 
-exports.deleteCategory = async (req, res) => {
+exports.deleteCategory = async (req, res, next) => {
     try {
-        const category = await Category.findByPk(req.params.id);
-        if (!category) return res.status(404).json({message: 'Category not found'});
-
-        await category.destroy();
-        res.status(204).send();
+        await Category.delete(req.params.id);
+        res.json({ status: 'success' });
     } catch (err) {
-        res.status(500).json({message: err.message});
+        next(err);
     }
 };

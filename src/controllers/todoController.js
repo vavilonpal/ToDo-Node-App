@@ -1,6 +1,6 @@
 const { Todo, Category } = require('../models');
 const { Op } = require('sequelize');
-
+const { io } = require("../server");
 exports.getAllTodos = async (req, res) => {
     try {
         const {
@@ -66,6 +66,7 @@ exports.createTodo = async (req, res) => {
             due_date,
             user_id: userId
         });
+        io.emit("task.created", todo);
 
         res.status(201).json(todo);
     } catch (err) {
@@ -86,6 +87,9 @@ exports.updateTodo = async (req, res) => {
         todo.due_date = due_date ?? todo.due_date;
 
         await todo.save();
+
+        io.emit("task.updated", todo);
+
         res.json(todo);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -112,6 +116,9 @@ exports.deleteTodo = async (req, res) => {
         if (!todo) return res.status(404).json({ message: 'Todo not found' });
 
         await todo.destroy();
+
+        io.emit("task.deleted", todo);
+
         res.status(204).send();
     } catch (err) {
         res.status(500).json({ message: err.message });
