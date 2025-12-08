@@ -12,7 +12,7 @@ module.exports = (io) => {
 
         try {
             const payload = jwt.verify(token, process.env.JWT_SECRET);
-            socket.user = payload; // { id, email, role }
+            socket.user = payload;
             next();
         } catch (err) {
             next(new Error("INVALID_TOKEN"));
